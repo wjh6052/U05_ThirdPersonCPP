@@ -34,4 +34,9 @@ private:
 	UPROPERTY(VisibleDefaultsOnly)
 		class UCameraComponent* Camera;
 
+	//Actor Component
+private:
+	UPROPERTY(VisibleDefaultsOnly)
+		class UCStatusComponent* Status;
+
 };
