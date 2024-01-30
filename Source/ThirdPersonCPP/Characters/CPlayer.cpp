@@ -4,6 +4,9 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CStatusComponent.h"
+#include "Components/COptionComponent.h"
+#include "Components/CStateComponent.h"
+#include "Components/CMontagesComponent.h"
 
 ACPlayer::ACPlayer()
 {
@@ -15,6 +18,9 @@ ACPlayer::ACPlayer()
 
 	//Create Actor Component
 	CHelpers::CreateActorComponent(this, &Status, "Status");
+	CHelpers::CreateActorComponent(this, &Option, "Option");
+	CHelpers::CreateActorComponent(this, &State, "State");
+	CHelpers::CreateActorComponent(this, &Montages, "Montages");
 
 	//Component Settings
 	// -> MeshComp
@@ -64,6 +70,7 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis("MoveRight", this, &ACPlayer::OnMoveRight);
 	PlayerInputComponent->BindAxis("HorizontalLook", this, &ACPlayer::OnHorizontalLook);
 	PlayerInputComponent->BindAxis("VerticalLook", this, &ACPlayer::OnVerticalLook);
+	PlayerInputComponent->BindAxis("Zoom", this, &ACPlayer::OnZoom);
 
 }
 
@@ -91,11 +98,20 @@ void ACPlayer::OnMoveRight(float InAxis)
 
 void ACPlayer::OnHorizontalLook(float InAxis)
 {
-
+	float rate = Option->GetHorizontalLookRate();
+	AddControllerYawInput(InAxis * rate * GetWorld()->GetDeltaSeconds());
 }
 
 void ACPlayer::OnVerticalLook(float InAxis)
 {
-
+	float rate = Option->GetVerticalLookRate();
+	AddControllerPitchInput(InAxis * rate * GetWorld()->GetDeltaSeconds());
 }
 
+void ACPlayer::OnZoom(float InAxis)
+{
+	float rate = Option->GetZoomSpeed() * InAxis * GetWorld()->GetDeltaSeconds();
+
+	SpringArm->TargetArmLength += rate;
+	SpringArm->TargetArmLength = FMath::Clamp(SpringArm->TargetArmLength, Option->GetZoomMin(), Option->GetZoomMax());
+}
