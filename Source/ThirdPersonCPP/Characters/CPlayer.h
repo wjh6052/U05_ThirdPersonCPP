@@ -28,11 +28,18 @@ private:
 	void OnVerticalLook(float InAxis);
 	void OnZoom(float InAxis);
 
+
 	//Action Event
 private:
 	void OnEvade();
 	void OnWalk();
 	void OffWalk();
+
+	void OnFist();
+	void OnOneHand();
+	void OnTwoHand();
+	void OnMagicBall();
+
 
 private:
 	void Begin_Roll();

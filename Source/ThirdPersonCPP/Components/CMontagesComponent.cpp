@@ -33,7 +33,7 @@ void UCMontagesComponent::BeginPlay()
 		}
 	}
 	
-	CLog::Print(datas.Num());
+	//CLog::Print(datas.Num());
 
 }
 

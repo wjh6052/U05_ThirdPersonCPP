@@ -1,8 +1,11 @@
 #include "CActionComponent.h"
+#include "Global.h"
+#include "GameFramework/Character.h"
+#include "Actions/CActionData.h"
+
 
 UCActionComponent::UCActionComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
 
 }
 
@@ -10,11 +13,22 @@ void UCActionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	ACharacter* ownerCharacter = Cast<ACharacter>(GetOwner());
+	CheckNull(ownerCharacter);
+
+	for (int32 i = 0; i < (int32)EActionType::Max; i++)
+	{
+		if(!!Datas[i])
+			Datas[i]->BeginPlay(ownerCharacter);
+	}
 
 }
 
 void UCActionComponent::SetUnaremdMode()
 {
+	//Datas[(int32)Type]->GetEquipment()->Unequip();
+	//Datas[(int32)EActionType::Unaremd]->GetEquipment()->Unequip();
+
 	ChangeType(EActionType::Unarmed);
 }
 

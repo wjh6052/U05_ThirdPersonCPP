@@ -10,7 +10,9 @@ enum class EActionType : uint8
 	Unarmed, Fist, OneHand, TwoHand, Warp, MagicBall, Tornado, Max
 };
 
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FActionTypeChangedSignature, EActionType, InPrevType, EActionType, InNewType);
+
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class THIRDPERSONCPP_API UCActionComponent : public UActorComponent
@@ -61,6 +63,10 @@ private:
 public:
 	UPROPERTY(BlueprintAssignable)
 		FActionTypeChangedSignature OnActionTypeChanged;
+
+private:
+	UPROPERTY(EditDefaultsOnly)
+		class UCActionData* Datas[(int32)EActionType::Max];
 
 private:
 	EActionType Type;
