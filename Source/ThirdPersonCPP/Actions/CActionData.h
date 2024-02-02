@@ -27,6 +27,8 @@ public:
 
 };
 
+
+
 UCLASS()
 class THIRDPERSONCPP_API UCActionData : public UDataAsset
 {
@@ -38,9 +40,11 @@ public:
 public:
 	FORCEINLINE class ACEquipment* GetEquipment() { return Equipment; }
 
+
 private:
 	FString MakeLabelName(class ACharacter* InOwnerCharacter, FString InMiddleName);
 	
+
 public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Equipment")
 		TSubclassOf<class ACEquipment> EquipmentClass;
@@ -51,6 +55,11 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Equipment")
 		FLinearColor EquipmentColor;
 
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attachment")
+		TSubclassOf<class ACAttachment> AttachmentClass;
+
+
 private:
 	class ACEquipment* Equipment;
+	class ACAttachment* Attachment;
 };

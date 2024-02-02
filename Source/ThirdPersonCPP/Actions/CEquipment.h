@@ -7,6 +7,7 @@
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEquipmentDelegateSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUnequipmentDelegateSignature);
 
 
 UCLASS()
@@ -44,6 +45,9 @@ public:
 public:
 	UPROPERTY(BlueprintAssignable)
 		FEquipmentDelegateSignature OnEquipmentDelegate;
+
+	UPROPERTY(BlueprintAssignable)
+		FUnequipmentDelegateSignature OnUnequipmentDelegate;
 
 protected:
 	UPROPERTY(BlueprintReadOnly)

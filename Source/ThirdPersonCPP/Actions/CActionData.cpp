@@ -2,10 +2,21 @@
 #include "Global.h"
 #include "GameFramework/Character.h"
 #include "CEquipment.h"
+#include "CAttachment.h"
 
 void UCActionData::BeginPlay(class ACharacter* InOwnerCharacter)
 {
 	FTransform transform;
+
+
+	if (!!AttachmentClass)
+	{
+		Attachment = InOwnerCharacter->GetWorld()->SpawnActorDeferred<ACAttachment>(AttachmentClass, transform, InOwnerCharacter);
+		Attachment->SetActorLabel(MakeLabelName(InOwnerCharacter, "Attachment"));
+
+		UGameplayStatics::FinishSpawningActor(Attachment, transform);
+	}
+
 
 	if (!!EquipmentClass)
 	{
@@ -15,6 +26,12 @@ void UCActionData::BeginPlay(class ACharacter* InOwnerCharacter)
 		Equipment->SetActorLabel(MakeLabelName(InOwnerCharacter,"Equipment"));
 		
 		UGameplayStatics::FinishSpawningActor(Equipment, transform);
+	
+		if (!!Attachment)
+		{
+			Equipment->OnEquipmentDelegate.AddDynamic(Attachment, &ACAttachment::OnEquip);
+			Equipment->OnUnequipmentDelegate.AddDynamic(Attachment, &ACAttachment::OnUnequip);
+		}
 	}
 
 }
