@@ -43,6 +43,8 @@ private:
 	void OnMagicBall();
 
 
+	void OnDoAction();
+
 private:
 	void Begin_Roll();
 	void Begin_Backstep();

@@ -3,6 +3,7 @@
 #include "GameFramework/Character.h"
 #include "CEquipment.h"
 #include "CAttachment.h"
+#include "CDoAction.h"
 
 void UCActionData::BeginPlay(class ACharacter* InOwnerCharacter)
 {
@@ -34,6 +35,17 @@ void UCActionData::BeginPlay(class ACharacter* InOwnerCharacter)
 		}
 	}
 
+
+	if (!!DoActionClass)
+	{
+		DoAction = InOwnerCharacter->GetWorld()->SpawnActorDeferred<ACDoAction>(DoActionClass, transform, InOwnerCharacter);
+		DoAction->AttachToComponent(InOwnerCharacter->GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
+		DoAction->SetActorLabel(MakeLabelName(InOwnerCharacter, "DoAction"));
+		DoAction->SetDatas(DoActionDatas);
+
+		UGameplayStatics::FinishSpawningActor(DoAction, transform);
+		//DoAction->FinishSpawningActor(transform)
+	}
 }
 
 FString UCActionData::MakeLabelName(ACharacter* InOwnerCharacter, FString InMiddleName)
