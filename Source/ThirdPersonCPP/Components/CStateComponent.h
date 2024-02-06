@@ -8,7 +8,7 @@
 UENUM(BlueprintType)
 enum class EStateType : uint8 // 8 Byte
 {
-	Idle, Roll, Backstep, Equip, Action, Max
+	Idle, Roll, Backstep, Equip, Action, Hitted, Dead, Max
 };
 
 
@@ -42,11 +42,19 @@ public:
 	UFUNCTION(BlueprintPure)
 		FORCEINLINE bool ISActionMode() { return Type == EStateType::Action; }
 
+	UFUNCTION(BlueprintPure)
+		FORCEINLINE bool ISHittedMode() { return Type == EStateType::Hitted; }
+
+	UFUNCTION(BlueprintPure)
+		FORCEINLINE bool ISDeadMode() { return Type == EStateType::Dead; }
+
 	void SetIdleMode();
 	void SetRollMode();
 	void SetBackstepMode();
 	void SetEquipMode();
 	void SetActionMode();
+	void SetHittedMode();
+	void SetDeadMode();
 
 public:
 	FORCEINLINE EStateType GetType() { return Type; }
