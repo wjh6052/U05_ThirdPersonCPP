@@ -1,17 +1,16 @@
-#include "CAnimNotifyState_Collision.h"
+#include "CAnimNotifyState_Combo.h"
 #include "Global.h"
 #include "Components/CActionComponent.h"
 #include "Actions/CActionData.h"
-#include "Actions/CAttachment.h"
 #include "Actions/CDoAction_Melee.h"
 
 
-FString UCAnimNotifyState_Collision::GetNotifyName_Implementation() const
+FString UCAnimNotifyState_Combo::GetNotifyName_Implementation() const
 {
-	return "Collision";
+	return "Combo";
 }
 
-void UCAnimNotifyState_Collision::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
+void UCAnimNotifyState_Combo::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
 {
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration);
 
@@ -23,14 +22,14 @@ void UCAnimNotifyState_Collision::NotifyBegin(USkeletalMeshComponent* MeshComp, 
 	UCActionData* actionData = actionComp->GetCurrentData();
 	CheckNull(actionData);
 
-	ACAttachment* attachment = actionData->GetAttachment();
-	CheckNull(attachment);
+	ACDoAction_Melee* doAction_Melee = Cast<ACDoAction_Melee>(actionData->GetDoAction());
+	CheckNull(doAction_Melee);
 
-	attachment->OnCollision();
+	doAction_Melee->OnCombo();
 
 }
 
-void UCAnimNotifyState_Collision::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
+void UCAnimNotifyState_Combo::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
 	Super::NotifyEnd(MeshComp, Animation);
 
@@ -42,13 +41,8 @@ void UCAnimNotifyState_Collision::NotifyEnd(USkeletalMeshComponent* MeshComp, UA
 	UCActionData* actionData = actionComp->GetCurrentData();
 	CheckNull(actionData);
 
-	ACAttachment* attachment = actionData->GetAttachment();
-	CheckNull(attachment);
-
-	attachment->OffCollision();
-
 	ACDoAction_Melee* doAction_Melee = Cast<ACDoAction_Melee>(actionData->GetDoAction());
 	CheckNull(doAction_Melee);
 
-	doAction_Melee->ClearHittedCharacters();
+	doAction_Melee->OffCombo();
 }

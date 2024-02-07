@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "ICharacter.h"
-#include "Components/CStatusComponent.h"
+#include "Components/CStateComponent.h"
 #include "CEnemy.generated.h"
 
 UCLASS()
@@ -24,6 +24,8 @@ public:
 public:	
 	virtual void SetBodyColor(FLinearColor InColor);
 
+	UFUNCTION()
+		void ResetLogoColor();
 
 private:
 	UFUNCTION()
@@ -33,6 +35,7 @@ private:
 	void Hitted();
 	void Dead();
 
+	
 	
 	//Scene Component
 private:
@@ -56,6 +59,10 @@ private:
 
 	UPROPERTY(VisibleDefaultsOnly)
 		class UCStatusComponent* Status;
+
+private:
+	UPROPERTY(EditAnywhere)
+		float LaunchValue = 25.0f;
 
 
 private:
