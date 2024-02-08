@@ -3,6 +3,7 @@
 #include "GameFramework/Character.h"
 #include "Components/ShapeComponent.h"
 
+
 ACAttachment::ACAttachment()
 {
 	CHelpers::CreateSceneComponent(this, &Root, "Root");
@@ -30,6 +31,18 @@ void ACAttachment::AttachTo(FName InSocketName)
 	CheckNull(OwnerCharacter);
 
 	AttachToComponent
+	(
+		OwnerCharacter->GetMesh(),
+		FAttachmentTransformRules(EAttachmentRule::KeepRelative, true),
+		InSocketName
+	);
+}
+
+void ACAttachment::AttachToScene(USceneComponent* InComponent, FName InSocketName)
+{
+	CheckNull(OwnerCharacter);
+
+	InComponent->AttachToComponent
 	(
 		OwnerCharacter->GetMesh(),
 		FAttachmentTransformRules(EAttachmentRule::KeepRelative, true),
