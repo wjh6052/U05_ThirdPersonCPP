@@ -72,7 +72,7 @@ void ACAttachment::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedCompon
 		ACharacter* otherCharacter = Cast<ACharacter>(OtherActor);
 
 		if (!!otherCharacter)
-			OnAttachmentBeginOverlap.Broadcast(OwnerCharacter, this, otherCharacter);
+			OnAttachmentBeginOverlap.Broadcast(OverlappedComponent, OwnerCharacter, this, otherCharacter);
 	}
 }
 
@@ -83,7 +83,7 @@ void ACAttachment::OnComponentEndOverlap(UPrimitiveComponent* OverlappedComponen
 		ACharacter* otherCharacter = Cast<ACharacter>(OtherActor);
 
 		if (!!otherCharacter)
-			OnAttachmentEndOverlap.Broadcast(OwnerCharacter, this, otherCharacter);
+			OnAttachmentEndOverlap.Broadcast(OverlappedComponent, OwnerCharacter, this, otherCharacter);
 	}
 }
 

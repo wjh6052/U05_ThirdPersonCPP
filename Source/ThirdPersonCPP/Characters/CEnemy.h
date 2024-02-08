@@ -35,6 +35,9 @@ private:
 	void Hitted();
 	void Dead();
 
+	UFUNCTION()
+		void End_Dead();
+
 	
 	
 	//Scene Component
@@ -63,6 +66,9 @@ private:
 private:
 	UPROPERTY(EditAnywhere)
 		float LaunchValue = 25.0f;
+
+	UPROPERTY(EditAnywhere)
+		float DestroyPendingTime = 5.0f;
 
 
 private:
