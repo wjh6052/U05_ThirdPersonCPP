@@ -45,6 +45,11 @@ private:
 
 	void OnDoAction();
 
+	void OnDoSubAction();
+	void OffDoSubAction();
+
+
+
 private:
 	void Begin_Roll();
 	void Begin_Backstep();

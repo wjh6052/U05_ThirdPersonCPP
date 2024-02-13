@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "ICharacter.h"
+#include "Components/TimelineComponent.h"
 #include "Components/CStateComponent.h"
 #include "CEnemy.generated.h"
 
@@ -70,12 +71,21 @@ private:
 	UPROPERTY(EditAnywhere)
 		float DestroyPendingTime = 5.0f;
 
+	UPROPERTY(EditAnywhere)
+		class UCurveFloat* DissolveCurve;
+
+	UPROPERTY(VisibleInstanceOnly)
+		class UMaterialInstanceDynamic* DissolveMaterial;
+
 
 private:
 	class UMaterialInstanceDynamic* BodyMaterial;
 	class UMaterialInstanceDynamic* LogoMaterial;
 
+
 	class ACharacter* Attacker;
 	class AActor* Causer;
 	float DamageValue;
+
+	FTimeline DissolveTimeline;
 };

@@ -21,6 +21,10 @@ public:
 	virtual void Begin_DoAction() {};
 	virtual void End_DoAction() {};
 
+	virtual void BeginSubAction() {};
+	virtual void EndSubAction() {};
+
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 

@@ -37,6 +37,8 @@ ACEnemy::ACEnemy()
 	CHelpers::GetClass<UAnimInstance>(&animInstanceClass, "AnimBlueprint'/Game/Enemies/ABP_CEnemy.ABP_CEnemy_C'");
 	GetMesh()->SetAnimInstanceClass(animInstanceClass);
 
+	CHelpers::GetAsset<UCurveFloat>(&DissolveCurve, "CurveFloat'/Game/Materials/Curve_Dissolve.Curve_Dissolve'");
+
 
 	// -> Movement
 	GetCharacterMovement()->RotationRate = FRotator(0, 720, 0);
@@ -61,12 +63,15 @@ ACEnemy::ACEnemy()
 
 void ACEnemy::BeginPlay()
 {	
-	UMaterialInstanceConstant* bodyMaterialAsset, *logoMaterialAsset;
+	UMaterialInstanceConstant* bodyMaterialAsset, *logoMaterialAsset, * dissolveMaterialAsset;
+
 	CHelpers::GetAssetDynamic<UMaterialInstanceConstant>(&bodyMaterialAsset, "MaterialInstanceConstant'/Game/Characters/Mannequin/Materials/M_UE4Man_Body_Inst.M_UE4Man_Body_Inst'");
 	CHelpers::GetAssetDynamic<UMaterialInstanceConstant>(&logoMaterialAsset, "MaterialInstanceConstant'/Game/Characters/Mannequin/Materials/M_UE4Man_ChestLogo.M_UE4Man_ChestLogo'");
+	CHelpers::GetAssetDynamic<UMaterialInstanceConstant>(&dissolveMaterialAsset, "MaterialInstanceConstant'/Game/Materials/MAT_Dissolve_Inst.MAT_Dissolve_Inst'");
 
 	BodyMaterial = UMaterialInstanceDynamic::Create(bodyMaterialAsset, this);
 	LogoMaterial = UMaterialInstanceDynamic::Create(logoMaterialAsset, this);
+	DissolveMaterial = UMaterialInstanceDynamic::Create(logoMaterialAsset, this);
 
 	GetMesh()->SetMaterial(0, BodyMaterial);
 	GetMesh()->SetMaterial(1, LogoMaterial);
@@ -95,7 +100,11 @@ void ACEnemy::BeginPlay()
 		healthWidgetObject->Update(currentHP, maxHP);
 	}
 
-	HealthWidget;
+	FOnTimelineFloat onProgress;
+	onProgress.BindUFunction(this, "StartDissolve");
+	DissolveTimeline.AddInterpFloat(DissolveCurve, onProgress);
+
+	//Todo.
 
 	Action->SetUnaremdMode();
 }
