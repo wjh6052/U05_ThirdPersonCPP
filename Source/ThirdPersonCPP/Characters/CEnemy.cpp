@@ -10,19 +10,26 @@
 #include "Components/CStatusComponent.h"
 #include "Widgets/CNameWidget.h"
 #include "Widgets/CHealthWidget.h"
+#include "Actions/CActionData.h"
 
 
 ACEnemy::ACEnemy()
 {
+	//Tick On
+	PrimaryActorTick.bCanEverTick = true;
+
+
 	//Create SceneComponent
 	CHelpers::CreateSceneComponent<UWidgetComponent>(this, &NameWidget, "NameWidget", GetMesh());
 	CHelpers::CreateSceneComponent<UWidgetComponent>(this, &HealthWidget, "HealthWidget", GetMesh());
+
 
 	//Create ActorComponent
 	CHelpers::CreateActorComponent<UCActionComponent>(this, &Action, "Action");
 	CHelpers::CreateActorComponent<UCMontagesComponent>(this, &Montages, "Montages");
 	CHelpers::CreateActorComponent<UCStateComponent>(this, &State, "State");
 	CHelpers::CreateActorComponent<UCStatusComponent>(this, &Status, "Status");
+
 
 	//Component Settings
 	// -> Mesh
@@ -63,6 +70,7 @@ ACEnemy::ACEnemy()
 
 void ACEnemy::BeginPlay()
 {	
+	//Set Dynamic Materal
 	UMaterialInstanceConstant* bodyMaterialAsset, *logoMaterialAsset, * dissolveMaterialAsset;
 
 	CHelpers::GetAssetDynamic<UMaterialInstanceConstant>(&bodyMaterialAsset, "MaterialInstanceConstant'/Game/Characters/Mannequin/Materials/M_UE4Man_Body_Inst.M_UE4Man_Body_Inst'");
@@ -71,15 +79,21 @@ void ACEnemy::BeginPlay()
 
 	BodyMaterial = UMaterialInstanceDynamic::Create(bodyMaterialAsset, this);
 	LogoMaterial = UMaterialInstanceDynamic::Create(logoMaterialAsset, this);
-	DissolveMaterial = UMaterialInstanceDynamic::Create(logoMaterialAsset, this);
+	DissolveMaterial = UMaterialInstanceDynamic::Create(dissolveMaterialAsset, this);
 
 	GetMesh()->SetMaterial(0, BodyMaterial);
 	GetMesh()->SetMaterial(1, LogoMaterial);
 
+
+	//Bind StateType Changed Event
 	State->OnStateTypeChanged.AddDynamic(this, &ACEnemy::OnStateTypeChanged);
 
+
+	//Blueprint BeginPlay
 	Super::BeginPlay();
 
+
+	//Initialize Widget
 	NameWidget->InitWidget();
 	UCNameWidget* nameWidgetObject = Cast<UCNameWidget>(NameWidget->GetUserWidgetObject());
 	if (!!nameWidgetObject)
@@ -100,13 +114,29 @@ void ACEnemy::BeginPlay()
 		healthWidgetObject->Update(currentHP, maxHP);
 	}
 
+
+	//Bind Dissovle Timeline Evant
 	FOnTimelineFloat onProgress;
-	onProgress.BindUFunction(this, "StartDissolve");
+	onProgress.BindUFunction(this, "StartDissolve"); // 타임라인이 시작할때 StartDissolve 실행
 	DissolveTimeline.AddInterpFloat(DissolveCurve, onProgress);
 
-	//Todo.
 
+
+	//
+	FOnTimelineEvent onFinish;
+	onFinish.BindUFunction(this, "EndDissolve"); // 타임라인이 끝날때 EndDissolve 실행
+	DissolveTimeline.SetTimelineFinishedFunc(onFinish);
+
+
+	//----- 기타 -----
 	Action->SetUnaremdMode();
+}
+
+void ACEnemy::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	DissolveTimeline.TickTimeline(DeltaTime);
 }
 
 float ACEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -130,6 +160,8 @@ float ACEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AContro
 
 void ACEnemy::SetBodyColor(FLinearColor InColor)
 {
+	CheckTrue(State->ISDeadMode());
+
 	if (State->ISHittedMode())
 	{
 		InColor *= 30.f;
@@ -166,17 +198,21 @@ void ACEnemy::Hitted()
 
 	healthWidgetObject->Update(Status->GetCurrentHealth(), Status->GetMaxHealth());
 
+
 	//Play Hitted Montage
 	Montages->PlayHitted();
+
 
 	//Look At Attacker
 	FVector start = GetActorLocation();
 	FVector target = Attacker->GetActorLocation();
 	SetActorRotation(UKismetMathLibrary::FindLookAtRotation(start, target));
 
+
 	//Launch Character
 	FVector direction = (start - target).GetSafeNormal();
 	LaunchCharacter(direction * DamageValue * LaunchValue, true, false);
+
 
 	//Set Hitted Color
 	SetBodyColor(FLinearColor::Green);
@@ -185,15 +221,18 @@ void ACEnemy::Hitted()
 
 void ACEnemy::Dead()
 {
+
 	//Hidden Widgets
 	NameWidget->SetVisibility(false);
 	HealthWidget->SetVisibility(false);
+
 
 	//Ragdoll
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->GlobalAnimRateScale = 0.0f;
+
 
 	//Add Force
 	//방향 * 힘 * 데미지
@@ -204,18 +243,41 @@ void ACEnemy::Dead()
 
 	GetMesh()->AddForceAtLocation(force, start);
 
+
 	//Off All Collisions
 	Action->OffAllCollisions();
 
-	//Todo. Off All Attachment Collisions...
-	//Todo. Destroy All Owing Children
 
-	UKismetSystemLibrary::K2_SetTimer(this, "End_Dead", DestroyPendingTime, false);
+	//Set Dissovle Material & Play Dissolve Timeline
+	FLinearColor equipmentColor = Action->GetCurrentData()->EquipmentColor;
+	DissolveMaterial->SetVectorParameterValue("BaseColor", equipmentColor);
+
+	for (int32 i = 0; i < GetMesh()->GetNumMaterials(); i++)
+		GetMesh()->SetMaterial(i, DissolveMaterial);
+
+
+
+	DissolveTimeline.PlayFromStart();
+	//Timeline 시작
+
+
 }
 
 void ACEnemy::End_Dead()
 {
 	Destroy();
+}
+
+void ACEnemy::StartDissolve(float Output)
+{
+	CheckNull(DissolveMaterial);
+
+	DissolveMaterial->SetScalarParameterValue("Amount", Output);
+}
+
+void ACEnemy::EndDissolve()
+{
+	UKismetSystemLibrary::K2_SetTimer(this, "End_Dead", DestroyPendingTime, false);
 }
 
 
