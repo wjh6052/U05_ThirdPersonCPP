@@ -30,6 +30,7 @@ public:
 
 public:
 	FORCEINLINE void SetDatas(TArray<FDoActionData> InDatas) { Datas = InDatas; }
+	FORCEINLINE void SetEquippedThis(const bool* InEquippedThis) { bEquippedThis = InEquippedThis; }
 
 public:
 	UFUNCTION()
@@ -50,5 +51,7 @@ protected:
 
 protected:
 	TArray<FDoActionData> Datas;
+
+	const bool* bEquippedThis;
 
 };
