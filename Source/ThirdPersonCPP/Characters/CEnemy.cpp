@@ -129,7 +129,7 @@ void ACEnemy::BeginPlay()
 
 
 	//----- ±âÅ¸ -----
-	Action->SetUnaremdMode();
+	//Action->SetUnaremdMode();
 }
 
 void ACEnemy::Tick(float DeltaTime)
