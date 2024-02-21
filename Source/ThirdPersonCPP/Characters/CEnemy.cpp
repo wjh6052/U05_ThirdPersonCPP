@@ -10,7 +10,8 @@
 #include "Components/CStatusComponent.h"
 #include "Widgets/CNameWidget.h"
 #include "Widgets/CHealthWidget.h"
-#include "Actions/CActionData.h"
+#include "Actions/CActionData_Spawned.h"
+#include "Actions/CEquipment.h"
 
 
 ACEnemy::ACEnemy()
@@ -98,8 +99,8 @@ void ACEnemy::BeginPlay()
 	UCNameWidget* nameWidgetObject = Cast<UCNameWidget>(NameWidget->GetUserWidgetObject());
 	if (!!nameWidgetObject)
 	{
-		const FString& controllerName = GetController()->GetName();
-		const FString& characterName = GetName();
+		const FString& controllerName = GetController()->GetName().Replace(L"BP_CAIController_",L"");
+		const FString& characterName = GetName().Replace(L"BP_CEnemy_",L"");
 
 		nameWidgetObject->SetNames(controllerName, characterName);
 	}
@@ -249,23 +250,29 @@ void ACEnemy::Dead()
 
 
 	//Set Dissovle Material & Play Dissolve Timeline
-	FLinearColor equipmentColor = Action->GetCurrentData()->EquipmentColor;
+	FLinearColor equipmentColor = FLinearColor::Black;
+	if (!!Action->GetCurrentData() && !!Action->GetCurrentData()->GetEquipment())
+	{
+		equipmentColor = Action->GetCurrentData()->GetEquipment()->GetColor();
+
+	}
+
 	DissolveMaterial->SetVectorParameterValue("BaseColor", equipmentColor);
 
 	for (int32 i = 0; i < GetMesh()->GetNumMaterials(); i++)
 		GetMesh()->SetMaterial(i, DissolveMaterial);
 
 
-
-	DissolveTimeline.PlayFromStart();
 	//Timeline ½ÃÀÛ
-
-
+	DissolveTimeline.PlayFromStart();
 }
 
 void ACEnemy::End_Dead()
 {
+	Action->End_Dead();
+
 	Destroy();
+
 }
 
 void ACEnemy::StartDissolve(float Output)
@@ -277,7 +284,8 @@ void ACEnemy::StartDissolve(float Output)
 
 void ACEnemy::EndDissolve()
 {
-	UKismetSystemLibrary::K2_SetTimer(this, "End_Dead", DestroyPendingTime, false);
+	End_Dead();
+	//UKismetSystemLibrary::K2_SetTimer(this, "End_Dead", DestroyPendingTime, false);
 }
 
 

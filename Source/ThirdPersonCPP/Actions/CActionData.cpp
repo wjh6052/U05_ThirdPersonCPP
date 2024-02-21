@@ -5,9 +5,11 @@
 #include "CAttachment.h"
 #include "CDoAction.h"
 
-void UCActionData::BeginPlay(class ACharacter* InOwnerCharacter)
+void UCActionData::BeginPlay(ACharacter* InOwnerCharacter, UCActionData_Spawned** OutSpawned)
 {
 	FTransform transform;
+
+	ACAttachment* Attachment = nullptr;
 
 
 	if (!!AttachmentClass)
@@ -18,6 +20,7 @@ void UCActionData::BeginPlay(class ACharacter* InOwnerCharacter)
 		UGameplayStatics::FinishSpawningActor(Attachment, transform);
 	}
 
+	ACEquipment* Equipment = nullptr;
 
 	if (!!EquipmentClass)
 	{
@@ -35,6 +38,7 @@ void UCActionData::BeginPlay(class ACharacter* InOwnerCharacter)
 		}
 	}
 
+	ACDoAction* DoAction = nullptr;
 
 	if (!!DoActionClass)
 	{
@@ -57,6 +61,11 @@ void UCActionData::BeginPlay(class ACharacter* InOwnerCharacter)
 			DoAction->SetEquippedThis(Equipment->IsEquippedThis());
 		}
 	}
+
+	(*OutSpawned) = NewObject<UCActionData_Spawned>();
+	(*OutSpawned)->Attachment = Attachment;
+	(*OutSpawned)->Equipment = Equipment;
+	(*OutSpawned)->DoAction = DoAction;
 }
 
 FString UCActionData::MakeLabelName(ACharacter* InOwnerCharacter, FString InMiddleName)

@@ -1,7 +1,7 @@
 #include "CAnimNotifyState_Collision.h"
 #include "Global.h"
 #include "Components/CActionComponent.h"
-#include "Actions/CActionData.h"
+#include "Actions/CActionData_Spawned.h"
 #include "Actions/CAttachment.h"
 #include "Actions/CDoAction_Melee.h"
 
@@ -20,7 +20,7 @@ void UCAnimNotifyState_Collision::NotifyBegin(USkeletalMeshComponent* MeshComp, 
 	UCActionComponent* actionComp = CHelpers::GetComponent<UCActionComponent>(MeshComp->GetOwner());
 	CheckNull(actionComp);
 
-	UCActionData* actionData = actionComp->GetCurrentData();
+	UCActionData_Spawned* actionData = actionComp->GetCurrentData();
 	CheckNull(actionData);
 
 	ACAttachment* attachment = actionData->GetAttachment();
@@ -39,7 +39,7 @@ void UCAnimNotifyState_Collision::NotifyEnd(USkeletalMeshComponent* MeshComp, UA
 	UCActionComponent* actionComp = CHelpers::GetComponent<UCActionComponent>(MeshComp->GetOwner());
 	CheckNull(actionComp);
 
-	UCActionData* actionData = actionComp->GetCurrentData();
+	UCActionData_Spawned* actionData = actionComp->GetCurrentData();
 	CheckNull(actionData);
 
 	ACAttachment* attachment = actionData->GetAttachment();
