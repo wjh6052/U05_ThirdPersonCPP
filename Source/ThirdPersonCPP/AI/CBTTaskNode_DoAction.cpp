@@ -1,6 +1,8 @@
 #include "CBTTaskNode_DoAction.h"
 #include "Global.h"
+
 #include "Characters/CAIController.h"
+
 #include "Components/CActionComponent.h"
 #include "Components/CStateComponent.h"
 

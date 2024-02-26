@@ -1,27 +1,28 @@
-#include "CBTService_Melee.h"
+#include "CBTService_Magic.h"
 #include "Global.h"
+
 #include "Characters/CAIController.h"
 #include "Characters/CPlayer.h"
 #include "Characters/CEnemy_AI.h"
 #include "Components/CBehaviorComponent.h"
 #include "Components/CStateComponent.h"
-#include "Components/CPatrolComponent.h"
 
-UCBTService_Melee::UCBTService_Melee()
+
+UCBTService_Magic::UCBTService_Magic()
 {
-	NodeName = "Root_Melee";
+	NodeName = "Root_Magic";
 }
 
-void UCBTService_Melee::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+void UCBTService_Magic::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
-	
+
 
 	//Get Component =======================================
 	ACAIController* controller = Cast<ACAIController>(OwnerComp.GetOwner());
 	CheckNull(controller);
 
-	UCBehaviorComponent* behaviorComp = CHelpers::GetComponent<UCBehaviorComponent>(controller);	
+	UCBehaviorComponent* behaviorComp = CHelpers::GetComponent<UCBehaviorComponent>(controller);
 	CheckNull(behaviorComp);
 
 	ACEnemy_AI* enemy = Cast<ACEnemy_AI>(controller->GetPawn());
@@ -29,9 +30,7 @@ void UCBTService_Melee::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 
 	UCStateComponent* stateComp = CHelpers::GetComponent<UCStateComponent>(enemy);
 	CheckNull(stateComp);
-
-	UCPatrolComponent* patrolComp = CHelpers::GetComponent<UCPatrolComponent>(enemy);
-	CheckNull(patrolComp);
+	//=======================================
 
 
 	//Set Behaviot Hitted =======================================
@@ -48,37 +47,31 @@ void UCBTService_Melee::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 	//No Perceived Player
 	if (player == nullptr)
 	{
-		if (patrolComp != nullptr && patrolComp->IsPathValid())
-		{
-			behaviorComp->SetPatrolMode();
-
-			return;
-		}
-
 		behaviorComp->SetWaitMode();
+		controller->ClearFocus(EAIFocusPriority::LastFocusPriority);
 		return;
 	}
 
 
 	//Perceived Player =======================================
+	controller->SetFocus(player);
 	float distance = enemy->GetDistanceTo(player);
 
 
-	//In BehaviorRange
+	//In BehaviorRange =======================================
 	if (distance < controller->GetBehaviorRange())
+	{
+		behaviorComp->SetAvoidMode();
+		return;
+	}
+
+
+	//In Sight =======================================
+	if (distance < controller->GetSightRadius())
 	{
 		behaviorComp->SetActionMode();
 		return;
 	}
-
-
-	//In Sight
-	if (distance < controller->GetSightRadius())
-	{
-		behaviorComp->SetApproachMode();
-		return;
-	}
-
 
 
 }
