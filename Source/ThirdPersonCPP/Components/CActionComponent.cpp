@@ -96,6 +96,18 @@ void UCActionComponent::End_Dead()
 	}
 }
 
+void UCActionComponent::AbortedByDamaged()
+{
+	CheckNull(Datas[(int32)Type]);
+	CheckNull(Datas[(int32)Type]->GetEquipment());
+	CheckNull(Datas[(int32)Type]->GetDoAction());
+
+	Datas[(int32)Type]->GetEquipment()->Begin_Equip();
+	Datas[(int32)Type]->GetEquipment()->End_Equip();
+
+	Datas[(int32)Type]->GetDoAction()->Abort();
+}
+
 void UCActionComponent::SetMode(EActionType InType)
 {
 	if (Type == InType)

@@ -97,6 +97,8 @@ void ACDoAction_Tornado::End_DoAction()
 	UKismetSystemLibrary::K2_SetTimerDelegate(onFinish, ActiveTime, false);
 }
 
+
+
 void ACDoAction_Tornado::TickDamege()
 {
 	FDamageEvent damageEvent;
@@ -122,6 +124,20 @@ void ACDoAction_Tornado::TickDamege()
 	}
 }
 
+void ACDoAction_Tornado::OnAttachmentBeginOverlap(UPrimitiveComponent* InOverlappedComponent, ACharacter* InAttacker, AActor* InCauser, ACharacter* InOtherCharacter)
+{
+	Super::OnAttachmentBeginOverlap(InOverlappedComponent, InAttacker, InCauser, InOtherCharacter);
+
+	HittedCharacters.AddUnique(InOtherCharacter);
+}
+
+void ACDoAction_Tornado::OnAttachmentEndOverlap(UPrimitiveComponent* InOverlappedComponent, ACharacter* InAttacker, AActor* InCauser, ACharacter* InOtherCharacter)
+{
+	Super::OnAttachmentEndOverlap(InOverlappedComponent, InAttacker, InCauser, InOtherCharacter);
+
+	HittedCharacters.Remove(InOtherCharacter);
+}
+
 void ACDoAction_Tornado::Finish()
 {
 	bActivating = false;
@@ -141,16 +157,8 @@ void ACDoAction_Tornado::Finish()
 	UKismetSystemLibrary::K2_ClearTimer(this, "TickDamege");
 }
 
-void ACDoAction_Tornado::OnAttachmentBeginOverlap(UPrimitiveComponent* InOverlappedComponent, ACharacter* InAttacker, AActor* InCauser, ACharacter* InOtherCharacter)
+
+void ACDoAction_Tornado::Abort()
 {
-	Super::OnAttachmentBeginOverlap(InOverlappedComponent, InAttacker, InCauser, InOtherCharacter);
-
-	HittedCharacters.AddUnique(InOtherCharacter);
-}
-
-void ACDoAction_Tornado::OnAttachmentEndOverlap(UPrimitiveComponent* InOverlappedComponent, ACharacter* InAttacker, AActor* InCauser, ACharacter* InOtherCharacter)
-{
-	Super::OnAttachmentEndOverlap(InOverlappedComponent, InAttacker, InCauser, InOtherCharacter);
-
-	HittedCharacters.Remove(InOtherCharacter);
+	Finish();
 }

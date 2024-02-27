@@ -34,6 +34,14 @@ void UCBTService_Melee::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 	CheckNull(patrolComp);
 
 
+	//Check Dead =======================================
+	if (stateComp->ISDeadMode())
+	{
+		behaviorComp->SetWaitMode();
+		return;
+	}
+
+
 	//Set Behaviot Hitted =======================================
 	if (stateComp->ISHittedMode())
 	{

@@ -32,7 +32,7 @@ void ACDoAction_MagicBall::DoAction()
 
 
 	CheckFalse(Datas.Num() > 0);
-	if (true)
+	if (Aim->IsCanAim())
 	{
 		CheckFalse(Aim->IsCanAim());
 		CheckFalse(Aim->IsZooming());

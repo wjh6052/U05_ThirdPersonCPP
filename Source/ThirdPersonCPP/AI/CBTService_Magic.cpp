@@ -33,6 +33,14 @@ void UCBTService_Magic::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 	//=======================================
 
 
+	//Check Dead =======================================
+	if (stateComp->ISDeadMode())
+	{
+		behaviorComp->SetWaitMode();
+		return;
+	}
+
+
 	//Set Behaviot Hitted =======================================
 	if (stateComp->ISHittedMode())
 	{

@@ -1,19 +1,18 @@
-#include "CBTTaskNode_DoAction.h"
+#include "CBTTaskNode_ChangeAction.h"
 #include "Global.h"
 
 #include "Characters/CAIController.h"
-#include "Components/CActionComponent.h"
 #include "Components/CStateComponent.h"
 
 
-UCBTTaskNode_DoAction::UCBTTaskNode_DoAction()
+UCBTTaskNode_ChangeAction::UCBTTaskNode_ChangeAction()
 {
-	NodeName = "Action";
+	NodeName = "ChangeAction";
 
 	bNotifyTick = true;
 }
 
-EBTNodeResult::Type UCBTTaskNode_DoAction::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+EBTNodeResult::Type UCBTTaskNode_ChangeAction::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
@@ -24,15 +23,24 @@ EBTNodeResult::Type UCBTTaskNode_DoAction::ExecuteTask(UBehaviorTreeComponent& O
 	UCActionComponent* actionComp = CHelpers::GetComponent<UCActionComponent>(controller->GetPawn());
 	CheckNullResult(actionComp, EBTNodeResult::Failed);
 
-	RunningTime = 0;
-	actionComp->DoAction();
+	if (Type == EActionType::Warp)
+	{
+		if (actionComp->IsWarpMode() == false)
+			actionComp->SetWarpMode();
+	}
+	else if (Type == EActionType::MagicBall)
+	{
+		if (actionComp->IsMagicBallMode() == false)
+			actionComp->SetMagicBallMode();
+	}
 
 	return EBTNodeResult::InProgress;
 }
 
-void UCBTTaskNode_DoAction::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+void UCBTTaskNode_ChangeAction::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
+
 
 	ACAIController* controller = Cast<ACAIController>(OwnerComp.GetOwner());
 	CheckNull(controller);
@@ -41,9 +49,8 @@ void UCBTTaskNode_DoAction::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* N
 	CheckNull(stateComp);
 
 
-	RunningTime += DeltaSeconds;
 
-	if (RunningTime >= Delay && stateComp->IsIdleMode())
+	if (stateComp->IsIdleMode())
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 
 }
