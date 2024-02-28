@@ -112,13 +112,18 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Dead")
 		float LaunchValue = 100.0f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Widget")
+		TSubclassOf<class UCPlayerHealthWidget> HealthWidgetClass;
+
 
 private:
 	class UMaterialInstanceDynamic* BodyMaterial;
 	class UMaterialInstanceDynamic* LogoMaterial;
 
-
 	class ACharacter* Attacker;
 	class AActor* Causer;
 	float DamageValue;
+
+	class UCPlayerHealthWidget* HealthWidget;
+
 };

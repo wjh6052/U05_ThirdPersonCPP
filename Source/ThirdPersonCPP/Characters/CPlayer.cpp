@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInstanceConstant.h"
+#include "Blueprint/UserWidget.h"
 
 #include "Components/CStatusComponent.h"
 #include "Components/COptionComponent.h"
@@ -13,14 +14,18 @@
 #include "Components/CActionComponent.h"
 #include "Actions/CActionData.h"
 #include "Actions/CActionData_Spawned.h"
+#include "Widgets/CPlayerHealthWidget.h"
+
 
 ACPlayer::ACPlayer()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+
 	//Create Scene Component
 	CHelpers::CreateSceneComponent(this, &SpringArm, "SpringArm", GetMesh());
 	CHelpers::CreateSceneComponent(this, &Camera, "Camera", SpringArm);
+
 
 	//Create Actor Component
 	CHelpers::CreateActorComponent(this, &Action, "Action");
@@ -28,6 +33,7 @@ ACPlayer::ACPlayer()
 	CHelpers::CreateActorComponent(this, &Status, "Status");
 	CHelpers::CreateActorComponent(this, &Option, "Option");
 	CHelpers::CreateActorComponent(this, &State, "State");
+
 
 	//Component Settings
 	// -> MeshComp
@@ -42,6 +48,7 @@ ACPlayer::ACPlayer()
 	CHelpers::GetClass<UAnimInstance>(&animInstance, "AnimBlueprint'/Game/Player/ABP_CPlayer.ABP_CPlayer_C'");
 	GetMesh()->SetAnimInstanceClass(animInstance);
 
+
 	// -> SpringArmComp
 	SpringArm->SetRelativeLocation(FVector(0, 0, 140));
 	SpringArm->SetRelativeRotation(FRotator(0, 90, 0));
@@ -49,17 +56,24 @@ ACPlayer::ACPlayer()
 	SpringArm->bEnableCameraLag = true;
 	SpringArm->bUsePawnControlRotation = true;
 
+
 	// -> MovementComp
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->MaxWalkSpeed = Status->GetSprintSpeed();
 	GetCharacterMovement()->RotationRate = FRotator(0, 720, 0);
+
+
+	//Get Widgat classRef
+	CHelpers::GetClass<UCPlayerHealthWidget>(&HealthWidgetClass, "WidgetBlueprint'/Game/Widgets/WB_Player_Health.WB_Player_Health_C'");
 }
 
 void ACPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
+
+	//Set Dyynamic Materials
 	UMaterialInstanceConstant* bodyMaterialAsset;
 	UMaterialInstanceConstant* logoMaterialAsset;
 
@@ -72,9 +86,17 @@ void ACPlayer::BeginPlay()
 	GetMesh()->SetMaterial(0, BodyMaterial);
 	GetMesh()->SetMaterial(1, LogoMaterial);
 
+
+	//Bind StateType Chagned Event
 	State->OnStateTypeChanged.AddDynamic(this, &ACPlayer::OnStateTypeChanged);
 
 	Action->SetUnaremdMode();
+
+
+	//Create Widget
+	HealthWidget = Cast<UCPlayerHealthWidget>(CreateWidget(GetController<APlayerController>(), HealthWidgetClass));
+	CheckNull(HealthWidget);
+	HealthWidget->AddToViewport();
 }
 
 void ACPlayer::Tick(float DeltaTime)
@@ -126,6 +148,8 @@ float ACPlayer::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AContr
 	Action->AbortedByDamaged();
 
 	Status->DecreaseHealth(DamageValue);
+	HealthWidget->Update();
+
 
 	if (Status->GetCurrentHealth() <= 0.f)
 	{
@@ -297,6 +321,7 @@ void ACPlayer::Dead()
 
 void ACPlayer::End_Dead()
 {
+	Camera->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
 	CLog::Print("Player is dead :(");
 }
 

@@ -8,6 +8,7 @@
 #include "Characters/CEnemy_AI.h"
 #include "Characters/CPlayer.h"
 #include "Components/CBehaviorComponent.h"
+#include "Components/CStateComponent.h"
 
 
 
@@ -71,6 +72,18 @@ void ACAIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	ACPlayer* player = Behavior->GetPlayerKey();
+	if (!!player)
+	{
+		UCStateComponent* playerStateComp = CHelpers::GetComponent<UCStateComponent>(player);
+		if (!!playerStateComp)
+		{
+			if (playerStateComp->ISDeadMode())
+			{
+				Blackboard->SetValueAsObject("PlayerKey", nullptr);
+			}
+		}
+	}
 
 	if (bDrawDebug)
 	{
@@ -78,6 +91,8 @@ void ACAIController::Tick(float DeltaTime)
 		DrawDebugSphere(GetWorld(), center, Sight->SightRadius, 30, FColor::Green);
 		DrawDebugSphere(GetWorld(), center, BehaviorRange, 30, FColor::Red);
 	}
+
+
 }
 
 float ACAIController::GetSightRadius()
@@ -98,6 +113,7 @@ void ACAIController::OnPerceptionUpdated(const TArray<AActor*>& UpdatedActors)
 		player = Cast<ACPlayer>(actor);
 
 		if (!!player) break;
+
 	}
 
 	Blackboard->SetValueAsObject("PlayerKey", player);
