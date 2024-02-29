@@ -58,6 +58,7 @@ public:
 
 public:
 	FORCEINLINE EStateType GetType() { return Type; }
+	FORCEINLINE EStateType GetPrevType() { return PrevType; }
 
 private:
 	void ChangeType(EStateType InNewType);
@@ -68,5 +69,6 @@ public:
 
 private:
 	EStateType Type;
+	EStateType PrevType;
 
 };

@@ -33,7 +33,6 @@ void ACHUD::DrawHUD()
 	CheckNull(StateTypeAsUEnum);
 
 	FString typeStr = StateTypeAsUEnum->GetNameStringByValue((int64)StateComp->GetType());
-
 	DrawText(typeStr, FLinearColor::Red, 30.0f, Canvas->ClipY - 50.0f, nullptr, 1.5f);
 
 	//Visible Aim(R-Button)

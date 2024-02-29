@@ -3,6 +3,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/PostProcessComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInstanceConstant.h"
@@ -25,6 +26,7 @@ ACPlayer::ACPlayer()
 	//Create Scene Component
 	CHelpers::CreateSceneComponent(this, &SpringArm, "SpringArm", GetMesh());
 	CHelpers::CreateSceneComponent(this, &Camera, "Camera", SpringArm);
+	CHelpers::CreateSceneComponent(this, &PostProcess, "PostProcess", GetRootComponent());
 
 
 	//Create Actor Component
@@ -33,6 +35,7 @@ ACPlayer::ACPlayer()
 	CHelpers::CreateActorComponent(this, &Status, "Status");
 	CHelpers::CreateActorComponent(this, &Option, "Option");
 	CHelpers::CreateActorComponent(this, &State, "State");
+
 
 
 	//Component Settings
@@ -64,6 +67,14 @@ ACPlayer::ACPlayer()
 	GetCharacterMovement()->RotationRate = FRotator(0, 720, 0);
 
 
+	// -> PostProcess
+	PostProcess->Settings.bOverride_VignetteIntensity = false;
+	PostProcess->Settings.VignetteIntensity = 2.0f;
+
+	PostProcess->Settings.bOverride_DepthOfFieldFocalDistance = false;
+	PostProcess->Settings.DepthOfFieldFocalDistance = 1.0f;
+
+
 	//Get Widgat classRef
 	CHelpers::GetClass<UCPlayerHealthWidget>(&HealthWidgetClass, "WidgetBlueprint'/Game/Widgets/WB_Player_Health.WB_Player_Health_C'");
 }
@@ -89,6 +100,11 @@ void ACPlayer::BeginPlay()
 
 	//Bind StateType Chagned Event
 	State->OnStateTypeChanged.AddDynamic(this, &ACPlayer::OnStateTypeChanged);
+
+
+	//Bind Hitted Event
+	OnHittedEvent.AddDynamic(this, &ACPlayer::End_Roll);
+	OnHittedEvent.AddDynamic(this, &ACPlayer::End_Backstep);
 
 	Action->SetUnaremdMode();
 
@@ -279,14 +295,14 @@ void ACPlayer::OffDoSubAction()
 	Action->DoSubAction(false);
 }
 
-void ACPlayer::Hitted()
+void ACPlayer::Hitted(EStateType InPrevType)
 {
-	//Update Health Widget
-	//UCHealthWidget* healthWidgetObject = Cast<UCHealthWidget>(HealthWidget->GetUserWidgetObject());
-	//CheckNull(healthWidgetObject);
-	
-	//healthWidgetObject->Update(Status->GetCurrentHealth(), Status->GetMaxHealth());
+	if (OnHittedEvent.IsBound())
+		OnHittedEvent.Broadcast();
 
+
+
+	Status->SetStop();
 
 	//Play Hitted Montage
 	Montages->PlayHitted();
@@ -316,12 +332,27 @@ void ACPlayer::Dead()
 	//Off All Collisions
 	Action->OffAllCollisions();
 
-	UKismetSystemLibrary::K2_SetTimer(this, "End_Dead", 5.0f, false);
+
+	//Dead Effect
+	PostProcess->Settings.bOverride_VignetteIntensity = true;
+	PostProcess->Settings.bOverride_DepthOfFieldFocalDistance = true;
+
+	DisableInput(GetController<APlayerController>());
+
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.25f);
+
+	//End Daed Timer
+	UKismetSystemLibrary::K2_SetTimer(this, "End_Dead", 1.0f, false);
 }
 
 void ACPlayer::End_Dead()
 {
-	Camera->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
+	APlayerController* controller = GetController<APlayerController>();
+	CheckNull(controller);
+
+	controller->ConsoleCommand("RestartLevel");
+
+
 	CLog::Print("Player is dead :(");
 }
 
@@ -329,6 +360,7 @@ void ACPlayer::Begin_Roll()
 {
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+
 
 	FVector start = GetActorLocation();
 
@@ -392,7 +424,7 @@ void ACPlayer::OnStateTypeChanged(EStateType InPrevType, EStateType InNewType)
 	{
 	case EStateType::Roll:		Begin_Roll();		break;
 	case EStateType::Backstep:	Begin_Backstep();	break;
-	case EStateType::Hitted:	Hitted();			break;
+	case EStateType::Hitted:	Hitted(InPrevType);	break;
 	case EStateType::Dead:		Dead();				break;
 	}
 }

@@ -7,6 +7,10 @@
 #include "GenericTeamAgentInterface.h"
 #include "CPlayer.generated.h"
 
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FHittedEventSignature);
+
+
 UCLASS()
 class THIRDPERSONCPP_API ACPlayer : public ACharacter, public IICharacter, public IGenericTeamAgentInterface
 {
@@ -53,7 +57,7 @@ private:
 	void OnDoSubAction();
 	void OffDoSubAction();
 
-	void Hitted();
+	void Hitted(EStateType InPrevType);
 	void Dead();
 
 	UFUNCTION()
@@ -65,10 +69,12 @@ private:
 	void Begin_Backstep();
 
 
-
 public:
-	void End_Roll();
-	void End_Backstep();
+	UFUNCTION()
+		void End_Roll();
+
+	UFUNCTION()
+		void End_Backstep();
 
 
 public:
@@ -87,6 +93,8 @@ private:
 	UPROPERTY(VisibleDefaultsOnly)
 		class UCameraComponent* Camera;
 
+	UPROPERTY(VisibleDefaultsOnly)
+		class UPostProcessComponent* PostProcess;
 
 	//Actor Component
 private:
@@ -114,6 +122,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Widget")
 		TSubclassOf<class UCPlayerHealthWidget> HealthWidgetClass;
+
+
+public:
+	UPROPERTY(BlueprintAssignable)
+		FHittedEventSignature OnHittedEvent;
+
 
 
 private:
