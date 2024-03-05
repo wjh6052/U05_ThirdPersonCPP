@@ -17,6 +17,7 @@
 #include "Actions/CActionData_Spawned.h"
 #include "Widgets/CPlayerHealthWidget.h"
 #include "Widgets/CSelectActionWidget.h"
+#include "Widgets/CSelectActionItemWidget.h"
 
 
 ACPlayer::ACPlayer()
@@ -120,6 +121,13 @@ void ACPlayer::BeginPlay()
 	CheckNull(SelectActionWidget);
 	SelectActionWidget->AddToViewport();
 	SelectActionWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	SelectActionWidget->GetItemWidget("Item1")->OnImageButtonPressed.AddDynamic(this, &ACPlayer::OnFist);
+	SelectActionWidget->GetItemWidget("Item2")->OnImageButtonPressed.AddDynamic(this, &ACPlayer::OnOneHand);
+	SelectActionWidget->GetItemWidget("Item3")->OnImageButtonPressed.AddDynamic(this, &ACPlayer::OnTwoHand);
+	SelectActionWidget->GetItemWidget("Item4")->OnImageButtonPressed.AddDynamic(this, &ACPlayer::OnWarp);
+	SelectActionWidget->GetItemWidget("Item5")->OnImageButtonPressed.AddDynamic(this, &ACPlayer::OnMagicBall);
+	SelectActionWidget->GetItemWidget("Item6")->OnImageButtonPressed.AddDynamic(this, &ACPlayer::OnTornado);
 }
 
 void ACPlayer::Tick(float DeltaTime)
@@ -144,11 +152,12 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("Evade", EInputEvent::IE_Pressed, this, &ACPlayer::OnEvade);
 	PlayerInputComponent->BindAction("Walk", EInputEvent::IE_Pressed, this, &ACPlayer::OnWalk);
 	PlayerInputComponent->BindAction("Walk", EInputEvent::IE_Released, this, &ACPlayer::OffWalk);
+
 	PlayerInputComponent->BindAction("Fist", EInputEvent::IE_Pressed, this, &ACPlayer::OnFist);
 	PlayerInputComponent->BindAction("OneHand", EInputEvent::IE_Pressed, this, &ACPlayer::OnOneHand);
 	PlayerInputComponent->BindAction("TwoHand", EInputEvent::IE_Pressed, this, &ACPlayer::OnTwoHand);
-	PlayerInputComponent->BindAction("MagicBall", EInputEvent::IE_Pressed, this, &ACPlayer::OnMagicBall);
 	PlayerInputComponent->BindAction("Warp", EInputEvent::IE_Pressed, this, &ACPlayer::OnWarp);
+	PlayerInputComponent->BindAction("MagicBall", EInputEvent::IE_Pressed, this, &ACPlayer::OnMagicBall);
 	PlayerInputComponent->BindAction("Tornado", EInputEvent::IE_Pressed, this, &ACPlayer::OnTornado);
 
 	PlayerInputComponent->BindAction("Action", EInputEvent::IE_Pressed, this, &ACPlayer::OnDoAction);
@@ -157,6 +166,8 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAction("SelectAction", EInputEvent::IE_Pressed, this, &ACPlayer::OnSelectAction);
 	PlayerInputComponent->BindAction("SelectAction", EInputEvent::IE_Released, this, &ACPlayer::OffSelectAction);
+
+	PlayerInputComponent->BindAction("Interact", EInputEvent::IE_Pressed, this, &ACPlayer::OnInteract);
 }
 
 FGenericTeamId ACPlayer::GetGenericTeamId() const
@@ -326,6 +337,29 @@ void ACPlayer::OffSelectAction()
 
 	SelectActionWidget->SetVisibility(ESlateVisibility::Hidden);
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+}
+
+void ACPlayer::OnInteract()
+{
+	FVector start = GetActorLocation();
+	FVector End = start + Camera->GetForwardVector() * 150.0f;
+	
+	/*
+	TArray<AActor*> ignores;
+	ignores.Add(this);
+
+	UKismetSystemLibrary::LineTraceSingle
+	(
+		GetWorld(),
+		start,
+		End,
+		UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_Visibility),
+		true,
+
+
+
+	);
+	*/
 }
 
 void ACPlayer::Hitted(EStateType InPrevType)

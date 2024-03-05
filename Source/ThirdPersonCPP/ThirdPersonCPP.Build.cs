@@ -14,7 +14,8 @@ public class ThirdPersonCPP : ModuleRules
 			"InputCore", 
 			"AIModule",
 			"GameplayTasks",
-			"UMG"
+			"UMG",
+			"SlateCore"
 		});
 
 		PublicIncludePaths.Add(ModuleDirectory);
