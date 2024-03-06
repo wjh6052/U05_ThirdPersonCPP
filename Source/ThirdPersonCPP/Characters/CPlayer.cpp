@@ -18,6 +18,7 @@
 #include "Widgets/CPlayerHealthWidget.h"
 #include "Widgets/CSelectActionWidget.h"
 #include "Widgets/CSelectActionItemWidget.h"
+#include "Demo/IInteractable.h"
 
 
 ACPlayer::ACPlayer()
@@ -341,12 +342,21 @@ void ACPlayer::OffSelectAction()
 
 void ACPlayer::OnInteract()
 {
+	CheckFalse(State->IsIdleMode());
+
 	FVector start = GetActorLocation();
 	FVector End = start + Camera->GetForwardVector() * 150.0f;
 	
-	/*
+	
 	TArray<AActor*> ignores;
 	ignores.Add(this);
+
+	for (const auto& child : Children)
+	{
+		ignores.Add(child);
+	}
+
+	FHitResult hitResult;
 
 	UKismetSystemLibrary::LineTraceSingle
 	(
@@ -355,11 +365,24 @@ void ACPlayer::OnInteract()
 		End,
 		UEngineTypes::ConvertToTraceType(ECollisionChannel::ECC_Visibility),
 		true,
-
-
-
+		ignores,
+		DebugInteractType,
+		hitResult,
+		true,
+		FLinearColor::Green,
+		FLinearColor::Red,
+		2.0f
 	);
-	*/
+	
+	CheckFalse(hitResult.bBlockingHit);
+	
+
+	IIInteractable* interactable = Cast<IIInteractable>(hitResult.GetActor());
+	CheckNull(interactable);
+
+	if ((Camera->GetForwardVector() | GetActorForwardVector()) > 0)
+		interactable->Interact(this);
+
 }
 
 void ACPlayer::Hitted(EStateType InPrevType)
