@@ -27,6 +27,9 @@ private:
 	UFUNCTION()
 		void StartTimeline(float Output);
 
+	UFUNCTION()
+		void FinishTimeline();
+
 
 private:
 	UPROPERTY(VisibleDefaultsOnly)
@@ -45,6 +48,10 @@ private:
 
 	UPROPERTY(EditAnywhere)
 		class ACSpline* Spline;
+
+	UPROPERTY(EditAnywhere)
+		float TimelineRate = 0.1f;
+
 
 
 private:

@@ -13,6 +13,7 @@
 #include "Components/COptionComponent.h"
 #include "Components/CMontagesComponent.h"
 #include "Components/CActionComponent.h"
+#include "Components/CFeetComponent.h"
 #include "Actions/CActionData.h"
 #include "Actions/CActionData_Spawned.h"
 #include "Widgets/CPlayerHealthWidget.h"
@@ -38,6 +39,7 @@ ACPlayer::ACPlayer()
 	CHelpers::CreateActorComponent(this, &Status, "Status");
 	CHelpers::CreateActorComponent(this, &Option, "Option");
 	CHelpers::CreateActorComponent(this, &State, "State");
+	CHelpers::CreateActorComponent(this, &Feet, "Feet");
 
 
 
@@ -58,7 +60,7 @@ ACPlayer::ACPlayer()
 	// -> SpringArmComp
 	SpringArm->SetRelativeLocation(FVector(0, 0, 140));
 	SpringArm->SetRelativeRotation(FRotator(0, 90, 0));
-	SpringArm->TargetArmLength = 250.f;
+	SpringArm->TargetArmLength = 350.f;
 	SpringArm->bEnableCameraLag = true;
 	SpringArm->bUsePawnControlRotation = true;
 
@@ -116,7 +118,12 @@ void ACPlayer::BeginPlay()
 	//Create Widget
 	HealthWidget = Cast<UCPlayerHealthWidget>(CreateWidget(GetController<APlayerController>(), HealthWidgetClass));
 	CheckNull(HealthWidget);
+
 	HealthWidget->AddToViewport();
+
+	if(OffHealthWidget)
+		HealthWidget->SetVisibility(ESlateVisibility::Hidden);
+
 
 	SelectActionWidget = Cast<UCSelectActionWidget>(CreateWidget(GetController<APlayerController>(), SelectActionWidgetClass));
 	CheckNull(SelectActionWidget);

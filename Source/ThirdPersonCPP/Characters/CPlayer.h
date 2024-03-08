@@ -121,12 +121,19 @@ private:
 	UPROPERTY(VisibleDefaultsOnly)
 		class UCActionComponent* Action;
 
+	UPROPERTY(VisibleDefaultsOnly)
+		class UCFeetComponent* Feet;
+
+
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Team")
 		uint8 TeamID = 0;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dead")
 		float LaunchValue = 100.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Widget")
+		bool OffHealthWidget = false;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Widget")
 		TSubclassOf<class UCPlayerHealthWidget> HealthWidgetClass;
@@ -154,5 +161,7 @@ private:
 
 	class UCPlayerHealthWidget* HealthWidget;
 	class UCSelectActionWidget* SelectActionWidget;
+
+	
 
 };

@@ -61,7 +61,7 @@ void ACDoor::Tick(float DeltaTime)
 	//실제 문을 열고 닫는 행위
 
 	FRotator currentRotation = Door->GetRelativeRotation();
-	CLog::Print(currentRotation, 1);
+
 
 	if (bOpen)
 	{
